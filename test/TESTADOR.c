@@ -5,20 +5,21 @@
 #include "soft_timer.h"
 
 
+
+
 void setup()
 {
- 
+soft_timer_t *timerTest;
+
+ soft_timer_init();
 //soft_timer_init;
 
 }
 
 void main()
 {
-	soft_timer_init(1);
-  //printf("teste2");
+	 setup();
 
-	printf("Plus one: %d\n", foo(10)); //Prints 11
-	//return 0;
 }
 
 

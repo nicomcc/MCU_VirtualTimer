@@ -50,6 +50,7 @@ typedef enum soft_timer_status
 /*****************************************************************************
  * Public functions.
  *****************************************************************************/
+
 /**
  * @brief Initialize software timer module.
  */
@@ -104,8 +105,5 @@ soft_timer_status_t soft_timer_stop(soft_timer_t *p_timer);
  *                 timer instance.
  */
 void soft_timer_destroy(soft_timer_t **pp_timer);
-
-
-int foo(int a);
 
 #endif /** __SOFT_TIMER_H__ */
