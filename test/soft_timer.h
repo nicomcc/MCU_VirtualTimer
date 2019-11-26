@@ -64,6 +64,8 @@ void soft_timer_init(void);
  */
 void soft_timer_create(soft_timer_t **pp_timer);
 
+void testFunction(soft_timer_t *pp_timer);
+
 /**
  * @brief Configure countdown timer.
  *
