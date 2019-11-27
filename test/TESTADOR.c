@@ -17,39 +17,33 @@ uint32_t valor = 1000;
 uint32_t value;
 bool ok = true;
 
-void setup()
-{
-
-
-soft_timer_create(tester);
-
-
-
-
-// soft_timer_init();
-
-}
 
 void func()
 {
+	printf("\nCALLBACK123");
 }
+
+void setup()
+{
+// soft_timer_init();
+
+soft_timer_create(tester);
+
+soft_timer_set(tester,func, 5, true);
+
+}
+
 
 void main()
 {
-	 setup();
+ setup();
+
+soft_timer_start(tester);
 	
-	
-
-//soft_timer_set(tester2, 5);
 
 
 
-
-printf("%d", soft_timer_set(tester,func, 60000, true));
-
-
-
-
+//printf("%d", soft_timer_set(tester,func, 60000, true));
 
 /*
 while(1){
