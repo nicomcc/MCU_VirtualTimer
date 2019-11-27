@@ -50,15 +50,14 @@ struct soft_timer{
  * Bodies of public functions.
  *****************************************************************************/
 
-/**
- * Set values for TIMER_CTRL Register.
+/*********
+   Set values for TIMER_CTRL Register.
    IRQ, START and RPT set to 1. In this way, once instanciated, timer will always be working to be used by virtual timers. 	
    PreScale set to 0 (00)
    Therefore timer_ctrl will be set to 0b0000000000000111, or 0x0007
-	Devida a baixa frequencia do timer clock de 1000Hz, temos um período de 1ms. Utilizando um prescale de 3, teremos 1/10^3. Ou seja, um período de 10
- */
-
-void soft_timer_init(void)
+   Devida a baixa frequencia do timer clock de 1000Hz, temos um período de 1ms, tempo mínimo de contagem. Este tempo mínimo de 1ms será      utilizado, portanto o prescale utilizado sera 0 (00), e o timer recarregara somente por um ciclo. Ou seja, a partir de seu valor máximo 0xffff.
+*********/
+void soft_timer_init(void)  
 	{
 	//timer_ctrl = 0x0007;
 	//timer_cnt = 0xFFFF;
@@ -66,10 +65,11 @@ void soft_timer_init(void)
 	printf("TESTE");
 	} 
 
-void soft_timer_create(soft_timer_t **pp_timer)  //DEFINIR O QUE FAZER AQUI
-{
-	// pp_timer = (soft_timer_t **)malloc(1 * sizeof(soft_timer_t *));  
 
+//aloca memoria dinamicamente a partir de um ponteiro vazio (void *)
+void soft_timer_create(soft_timer_t **pp_timer)  
+{
+	 pp_timer = (soft_timer_t **)malloc(1 * sizeof(soft_timer_t *));  
 }
 
 
@@ -98,14 +98,14 @@ soft_timer_status_t soft_timer_set(soft_timer_t          *p_timer,
 		soft_timer_t **aux_timer;
 		soft_timer_create(aux_timer);
 		printf("timer auxiliar instanciado");
-		//timeout_cb(*aux_timer);    //////////////////////////preciso referenciar callback a timer auxiliar
+		//timeout_cb(*aux_timer);    //////////////////////////preciso referenciar callback e startar timer auxiliar
 	}
 
 	return SOFT_TIMER_STATUS_SUCCESS;	
 }
 
 
-soft_timer_status_t soft_timer_start(soft_timer_t *p_timer)   ////////////implementar p_timer->timer_start
+soft_timer_status_t soft_timer_start(soft_timer_t *p_timer)   ////////////terminar de implementar p_timer->timer_start
 {
 
 	if((clock_count != previous_clock_count)) //every time global counter increases (1ms)
@@ -117,17 +117,18 @@ soft_timer_status_t soft_timer_start(soft_timer_t *p_timer)   ////////////implem
 		p_timer->callback(p_timer);    
 	}
 	
-	p_timer->callback(p_timer);   /////printar função de teste, NAO ESTA INDO 
-	//printf("\n\%d", p_timer->ms_time); /////printar valor de teste, NAO ESTA INDO 
+	p_timer->callback(p_timer);  //teste de implementação
+	printf("\n\%d", p_timer->ms_time); //teste de implementação
 	
 
 return SOFT_TIMER_STATUS_SUCCESS;
 }
 
 
+//libera memoria utilizar no timer virtual
 void soft_timer_destroy(soft_timer_t **pp_timer)
 {
-	free(pp_timer);  ////////////////
+	free(pp_timer);  
 }
 
 /*****************************************************************************

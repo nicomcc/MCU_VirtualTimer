@@ -6,7 +6,9 @@
 #include "soft_timer.h"
 #include "hmcu_timer.h"
 
-soft_timer_t *tester, *tester2;
+//soft_timer_t *tester, *tester2;
+
+void *tester;
 
 
 uint32_t valor = 1000;
