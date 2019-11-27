@@ -43,7 +43,7 @@ void main()
 
 
 //printf("%d", soft_timer_set(tester2, setup, 5, 1));
-printf("%d", soft_timer_set(tester2,func, 1, true));
+printf("%d", soft_timer_set(tester2,func, 60000, true));
 
 
 

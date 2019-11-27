@@ -82,7 +82,6 @@ soft_timer_status_t soft_timer_set(soft_timer_t          *p_timer,
                                    soft_timer_callback_t  timeout_cb,
                                    uint32_t               reload_ms,
                                    bool                   repeat);
-//soft_timer_status_t soft_timer_set(soft_timer_t          *p_timer, uint32_t               reload_ms);
 
 /**
  * @brief Start timer.
