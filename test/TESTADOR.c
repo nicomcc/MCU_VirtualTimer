@@ -27,6 +27,9 @@ void setup()
 
 soft_timer_create(&tester);
 
+
+
+
 soft_timer_set(&tester,func, 3, true);
 
 //soft_timer_set(&tester2,func, 32, true);

@@ -20,6 +20,7 @@
 
 #define MAX_TIMER_COUNT 65536 //max 16bit timer count value
 uint32_t clock_count = 0, previous_clock_count = 0;
+uint8_t total_timers = 0;  //check how many timers the program is using
 
 /*****************************************************************************
  * Private macros.
@@ -69,7 +70,13 @@ void soft_timer_init(void)
 //aloca memoria dinamicamente a partir de um ponteiro vazio (void *)
 void soft_timer_create(soft_timer_t **pp_timer)  
 {
-	 pp_timer = (soft_timer_t **)malloc(1 * sizeof(soft_timer_t *));  
+	 if (total_timers < SOFT_TIMER_MAX_INSTANCES - 1)
+	{
+	pp_timer = (soft_timer_t **)malloc(1 * sizeof(soft_timer_t *));  
+	total_timers++;
+	}
+	else
+		printf("Maximum number of timers has been reached.");
 }
 
 
@@ -129,6 +136,7 @@ return SOFT_TIMER_STATUS_SUCCESS;
 void soft_timer_destroy(soft_timer_t **pp_timer)
 {
 	free(pp_timer);  
+	total_timers--; 
 }
 
 /*****************************************************************************
