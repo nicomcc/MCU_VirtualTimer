@@ -6,11 +6,7 @@
 #include "soft_timer.h"
 #include "hmcu_timer.h"
 
-soft_timer_t **tester;
-
-soft_timer_t *tester2;  //////////com warning nao precisa usar
-
-
+soft_timer_t *tester, *tester2;
 
 
 uint32_t valor = 1000;
@@ -27,9 +23,11 @@ void setup()
 {
 // soft_timer_init();
 
-soft_timer_create(tester);
+soft_timer_create(&tester);
 
-soft_timer_set(tester,func, 5, true);
+soft_timer_set(&tester,func, 3, true);
+
+//soft_timer_set(&tester2,func, 32, true);
 
 }
 
@@ -38,7 +36,12 @@ void main()
 {
  setup();
 
-soft_timer_start(tester);
+soft_timer_start(&tester);
+
+
+
+
+//soft_timer_start(&tester2);
 	
 
 

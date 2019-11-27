@@ -43,7 +43,7 @@ struct soft_timer{
 	uint32_t ms_time;
 	bool repeat;
 	void *callback;
-	};
+	}; 
 
 /*****************************************************************************
  * Bodies of public functions.
@@ -63,11 +63,13 @@ void soft_timer_init(void)
 	//timer_cnt = 0xFFFF;
 	//timer_rld = 0xFFFF;
 	printf("TESTE");
-	}
+	} //soft_timer_status_t *timer1;
 
 void soft_timer_create(soft_timer_t **pp_timer)
 {
-	 pp_timer = (soft_timer_t **)malloc(1 * sizeof(soft_timer_t *));
+	// pp_timer = (soft_timer_t **)malloc(1 * sizeof(soft_timer_t *));
+        // pp_timer = timer1;
+	//soft_timer_t pp_timer;
 
 }
 
@@ -79,7 +81,7 @@ soft_timer_status_t soft_timer_set(soft_timer_t          *p_timer,
                                    bool                   repeat)
 {
 //p_timer = (soft_timer_t *)malloc(1 * sizeof(soft_timer_t)); ///NÃO ESTOU CONSEGUINDO TRABALHAR SEM ESSE MALLOC
-
+//	p_timer = timer1;
 	if (reload_ms < 0 || reload_ms > SOFT_TIMER_MAX_RELOAD_MS)
 		return SOFT_TIMER_STATUS_INVALID_STATE;
 
@@ -91,6 +93,8 @@ soft_timer_status_t soft_timer_set(soft_timer_t          *p_timer,
 	p_timer->ms_time = reload_ms;
 	p_timer->repeat = repeat;
 	p_timer->callback = &timeout_cb;
+
+//printf("\%d", p_timer->ms_time);
 
 	if(reload_ms > MAX_TIMER_COUNT)  //creates auxiliar timer to exceed the limit from 65536ms up to 100.000.000
 	{		
@@ -117,8 +121,8 @@ soft_timer_status_t soft_timer_start(soft_timer_t *p_timer)   ////////////implem
 		//p_timer->callback;    
 	}
 	
-	p_timer->callback;   /////printar função de teste, NAO ESTA INDO 
-	printf("\%d", p_timer->ms_time); /////printar valor de teste, NAO ESTA INDO 
+	//(p_timer->*callback)();   /////printar função de teste, NAO ESTA INDO 
+	printf("\n\%d", p_timer->ms_time); /////printar valor de teste, NAO ESTA INDO 
 	
 
 return SOFT_TIMER_STATUS_SUCCESS;
