@@ -38,9 +38,10 @@ uint32_t clock_count = 0, previous_clock_count = 0;
  *****************************************************************************/
 
 struct soft_timer{
+	uint32_t timer_cnt;
 	uint32_t ms_time;
 	bool repeat;
-};
+	};
 
 /*****************************************************************************
  * Bodies of public functions.
@@ -55,12 +56,12 @@ struct soft_timer{
  */
 
 void soft_timer_init(void)
-{
-//timer_ctrl = 0x0007;
-//timer_cnt = 0xFFFF;
-//timer_rld = 0xFFFF;
-printf("TESTE");
-}
+	{
+	//timer_ctrl = 0x0007;
+	//timer_cnt = 0xFFFF;
+	//timer_rld = 0xFFFF;
+	printf("TESTE");
+	}
 
 void soft_timer_create(soft_timer_t **pp_timer)
 {
@@ -86,25 +87,34 @@ p_timer = (soft_timer_t *)malloc(1 * sizeof(soft_timer_t)); ////////////////////
 
 	if(timeout_cb == NULL)	
 		return SOFT_TIMER_STATUS_INVALID_PARAMETER;
-
+	
+	p_timer->timer_cnt = 0;
 	p_timer->ms_time = reload_ms;
 	p_timer->repeat = repeat;
 	timeout_cb(p_timer);
 
-	if(reload_ms > MAX_TIMER_COUNT)
-{		
+	if(reload_ms > MAX_TIMER_COUNT)  //creates auxiliar timer to exceed the limit from 65536ms up to 100.000.000
+	{		
 		soft_timer_t **aux_timer;
 		soft_timer_create(aux_timer);
 		printf("timer auxiliar instanciado");
 		//timeout_cb(*aux_timer);    //////////////////////////
-}
+	}
 
 	return SOFT_TIMER_STATUS_SUCCESS;	
 }
 
 
-
-
+soft_timer_status_t soft_timer_start(soft_timer_t *p_timer)
+{
+	if(clock_count != previous_clock_count) //everytime global counter increases (1ms)
+		p_timer->timer_cnt++;
+	
+	if (p_timer->timer_cnt++ >= p_timer->ms_time)   //reaches timer goal
+		p_timer->timer_cnt = 0;     
+	
+	return SOFT_TIMER_STATUS_SUCCESS;
+}
 
 
 void soft_timer_destroy(soft_timer_t **pp_timer)
