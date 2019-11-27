@@ -42,7 +42,8 @@ struct soft_timer{
 	uint32_t timer_cnt;
 	uint32_t ms_time;
 	bool repeat;
-	void *callback;
+	//void *callback;
+	soft_timer_callback_t callback;
 	}; 
 
 /*****************************************************************************
@@ -63,13 +64,11 @@ void soft_timer_init(void)
 	//timer_cnt = 0xFFFF;
 	//timer_rld = 0xFFFF;
 	printf("TESTE");
-	} //soft_timer_status_t *timer1;
+	} 
 
-void soft_timer_create(soft_timer_t **pp_timer)
+void soft_timer_create(soft_timer_t **pp_timer)  //DEFINIR O QUE FAZER AQUI
 {
-	// pp_timer = (soft_timer_t **)malloc(1 * sizeof(soft_timer_t *));
-        // pp_timer = timer1;
-	//soft_timer_t pp_timer;
+	// pp_timer = (soft_timer_t **)malloc(1 * sizeof(soft_timer_t *));  
 
 }
 
@@ -80,8 +79,6 @@ soft_timer_status_t soft_timer_set(soft_timer_t          *p_timer,
                                    uint32_t               reload_ms,
                                    bool                   repeat)
 {
-//p_timer = (soft_timer_t *)malloc(1 * sizeof(soft_timer_t)); ///NÃO ESTOU CONSEGUINDO TRABALHAR SEM ESSE MALLOC
-//	p_timer = timer1;
 	if (reload_ms < 0 || reload_ms > SOFT_TIMER_MAX_RELOAD_MS)
 		return SOFT_TIMER_STATUS_INVALID_STATE;
 
@@ -92,7 +89,7 @@ soft_timer_status_t soft_timer_set(soft_timer_t          *p_timer,
 	p_timer->timer_cnt = 0;
 	p_timer->ms_time = reload_ms;
 	p_timer->repeat = repeat;
-	p_timer->callback = &timeout_cb;
+	p_timer->callback = timeout_cb;
 
 //printf("\%d", p_timer->ms_time);
 
@@ -110,19 +107,18 @@ soft_timer_status_t soft_timer_set(soft_timer_t          *p_timer,
 
 soft_timer_status_t soft_timer_start(soft_timer_t *p_timer)   ////////////implementar p_timer->timer_start
 {
-	//p_timer = (soft_timer_t *)malloc(1 * sizeof(soft_timer_t));//NÃO ESTOU CONSEGUINDO TRABALHAR SEM ESSE MALLOC, no caso esse é mais critico
 
 	if((clock_count != previous_clock_count)) //every time global counter increases (1ms)
 		p_timer->timer_cnt++;
 	
 	if (p_timer->timer_cnt >= p_timer->ms_time)   //reaches timer goal
 	{	
-		//p_timer->timer_cnt = 0; 
-		//p_timer->callback;    
+		p_timer->timer_cnt = 0; 
+		p_timer->callback(p_timer);    
 	}
 	
-	//(p_timer->*callback)();   /////printar função de teste, NAO ESTA INDO 
-	printf("\n\%d", p_timer->ms_time); /////printar valor de teste, NAO ESTA INDO 
+	p_timer->callback(p_timer);   /////printar função de teste, NAO ESTA INDO 
+	//printf("\n\%d", p_timer->ms_time); /////printar valor de teste, NAO ESTA INDO 
 	
 
 return SOFT_TIMER_STATUS_SUCCESS;
