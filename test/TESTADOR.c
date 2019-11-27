@@ -18,7 +18,7 @@ bool ok = true;
 
 void func()
 {
-	printf("\nCALLBACK123");
+	printf("CALLBACK123\n");
 }
 
 void setup()
@@ -30,7 +30,7 @@ soft_timer_create(&tester);
 
 
 
-soft_timer_set(&tester,func, 3, true);
+soft_timer_set(&tester,func, 3000, false);
 
 //soft_timer_set(&tester2,func, 32, true);
 
@@ -41,10 +41,16 @@ void main()
 {
  setup();
 
+
+
+
+while(1)
+{
+hmcu_timer_irq_handler();
 soft_timer_start(&tester);
 
 
-
+}
 
 //soft_timer_start(&tester2);
 	

@@ -43,7 +43,6 @@ struct soft_timer{
 	uint32_t timer_cnt;
 	uint32_t ms_time;
 	bool repeat;
-	//void *callback;
 	soft_timer_callback_t callback;
 	}; 
 
@@ -63,7 +62,7 @@ void soft_timer_init(void)
 	//timer_ctrl = 0x0007;
 	//timer_cnt = 0xFFFF;
 	//timer_rld = 0xFFFF;
-	printf("TESTE");
+	//printf("TESTE");
 	} 
 
 
@@ -114,21 +113,43 @@ soft_timer_status_t soft_timer_set(soft_timer_t          *p_timer,
 
 soft_timer_status_t soft_timer_start(soft_timer_t *p_timer)   ////////////terminar de implementar p_timer->timer_start
 {
-
-	if((clock_count != previous_clock_count)) //every time global counter increases (1ms)
+	//p_timer->timer_start = true;
+//&& p_timer->timer_cnt
+	if((clock_count != previous_clock_count) && p_timer->timer_start) //every time global counter increases (1ms)
+	{
+		//printf("\ncount virtual incrementado");
 		p_timer->timer_cnt++;
+	}
 	
 	if (p_timer->timer_cnt >= p_timer->ms_time)   //reaches timer goal
 	{	
 		p_timer->timer_cnt = 0; 
-		p_timer->callback(p_timer);    
+		p_timer->callback(p_timer);
+		if(!p_timer->repeat)
+			soft_timer_stop(p_timer);   
 	}
-	
-	p_timer->callback(p_timer);  //teste de implementação
-	printf("\n\%d", p_timer->ms_time); //teste de implementação
+
+		
+
+	//p_timer->callback(p_timer);  //teste de implementação
+	//printf("\n\%d", p_timer->ms_time); //teste de implementação
 	
 
 return SOFT_TIMER_STATUS_SUCCESS;
+}
+
+
+
+//soft_timer_status_t soft_timer_start(soft_timer_t *p_timer)   ////////////terminar de implementar p_timer->timer_start
+//{
+//	p_timer->timer_start = true;
+//	p_timer->timer_cnt = 0; 
+//}
+
+soft_timer_status_t soft_timer_stop(soft_timer_t *p_timer)
+{
+	p_timer->timer_start = false;
+	p_timer->timer_cnt = 0; 
 }
 
 
@@ -148,6 +169,11 @@ void hmcu_timer_irq_handler(void)
 {	
 	previous_clock_count = clock_count;
 	clock_count++;
+	
+	//printf("interrupt test");
+	//usleep(1000000);
+	//printf("\ninterrupt test");
+	usleep(1000);
 }
 
 
