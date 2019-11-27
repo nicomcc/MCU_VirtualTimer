@@ -71,7 +71,7 @@ void soft_timer_create(soft_timer_t **pp_timer)
 void testFunction(soft_timer_t *p_timer)
 {
 	p_timer = (soft_timer_t *)malloc(1 * sizeof(soft_timer_t));
-	//p_timer->test = 1;
+	p_timer->ms_time = 1;
 }
 
 soft_timer_status_t soft_timer_set(soft_timer_t          *p_timer,
@@ -100,6 +100,16 @@ p_timer = (soft_timer_t *)malloc(1 * sizeof(soft_timer_t)); ////////////////////
 }
 
 	return SOFT_TIMER_STATUS_SUCCESS;	
+}
+
+
+
+
+
+
+void soft_timer_destroy(soft_timer_t **pp_timer)
+{
+	free(pp_timer);  ////////////////
 }
 
 /*****************************************************************************
