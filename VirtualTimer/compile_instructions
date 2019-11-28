@@ -1,0 +1,8 @@
+gcc -c soft_timer.c -o soft_timer.o
+
+gcc -c TESTADOR.c -o TESTADOR.o
+
+gcc TESTADOR.o soft_timer.o -o TESTE
+
+./TESTE
+
