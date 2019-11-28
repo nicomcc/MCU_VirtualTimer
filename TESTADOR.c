@@ -8,7 +8,7 @@
 
 soft_timer_t *tester;
 soft_timer_t *tester2;
-soft_timer_t *tester3;
+soft_timer_t *tester3, *tester4, *tester5;
 
 
 void tmr1(soft_timer_t *p_timer)
@@ -33,10 +33,17 @@ soft_timer_init();
 soft_timer_create(&tester);
 soft_timer_create(&tester2);
 soft_timer_create(&tester3);
+soft_timer_create(&tester4);
+soft_timer_create(&tester5);
 
 soft_timer_set(tester, tmr1, 3000, true);
 soft_timer_set(tester2, tmr2, 1000, true);
 soft_timer_set(tester3, tmr3, 5000, true);
+
+soft_timer_destroy(&tester3);   //destroy middle timer to test array realocation
+
+soft_timer_set(tester4, tmr3, 5000, true);
+soft_timer_set(tester5, tmr3, 5000, true);
 }
 
 
@@ -47,7 +54,11 @@ setup();
 soft_timer_start(tester);
 soft_timer_start(tester2);
 soft_timer_start(tester3);
-//soft_timer_destroy(&tester);
+
+soft_timer_start(tester4);
+soft_timer_start(tester5);
+
+//soft_timer_destroy(&tester3);
 
 while(1)
 	hmcu_timer_irq_handler();

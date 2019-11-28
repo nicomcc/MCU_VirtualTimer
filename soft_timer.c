@@ -17,7 +17,6 @@
 
 uint8_t clock_count = 0, previous_clock_count = 0;  //checks if IRQ was called
 uint8_t total_timers = 0;  //check how many timers the program is using
-uint8_t arrayLenght = 0;  //array size to attribute timer id
 
 uint16_t timer_ctrl = 0x0007;
 uint16_t timer_cnt = 0xFFFF;
@@ -101,12 +100,22 @@ soft_timer_status_t soft_timer_set(soft_timer_t          *p_timer,
 	p_timer->ms_time = reload_ms;
 	p_timer->repeat = repeat;
 	p_timer->callback = timeout_cb;
-	p_timer->timer_id = arrayLenght;
-	timers[arrayLenght] = p_timer;
-	arrayLenght++;
+
+	//set pointer to first array null space. Implemented to prevent middle space gap from soft_timer_destroy()
+	for(uint8_t i = 0; i < SOFT_TIMER_MAX_INSTANCES; i++)
+	{
+		if (timers[i] == NULL)
+		{
+			p_timer->timer_id = i;
+			timers[i] = p_timer;
+			printf("%d\n",i);
+			break; 
+		}
+	}
 
 	return p_timer->status = SOFT_TIMER_STATUS_SUCCESS;	
 }
+
 
 //starts virtual timer//
 soft_timer_status_t soft_timer_start(soft_timer_t *p_timer)  
