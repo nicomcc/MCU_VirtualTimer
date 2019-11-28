@@ -8,7 +8,6 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <stdio.h>
-
 #include "soft_timer.h"
 #include "hmcu_timer.h"
 
@@ -71,6 +70,7 @@ void soft_timer_create(soft_timer_t **pp_timer)
 {
 	 if (total_timers < SOFT_TIMER_MAX_INSTANCES - 1)
 	{
+    *pp_timer = malloc(sizeof(void));
 	pp_timer = (soft_timer_t **)malloc(1 * sizeof(soft_timer_t *));  
 	total_timers++;
 	}
@@ -97,7 +97,7 @@ soft_timer_status_t soft_timer_set(soft_timer_t          *p_timer,
 	p_timer->repeat = repeat;
 	p_timer->callback = timeout_cb;
 
-//printf("\%d", p_timer->ms_time);
+	//printf("\%d\n", p_timer->ms_time);
 
 	if(reload_ms > MAX_TIMER_COUNT)  //creates auxiliar timer to exceed the limit from 65536ms up to 100.000.000
 	{		
@@ -111,10 +111,9 @@ soft_timer_status_t soft_timer_set(soft_timer_t          *p_timer,
 }
 
 
-soft_timer_status_t soft_timer_start(soft_timer_t *p_timer)   ////////////terminar de implementar p_timer->timer_start
+void soft_timer_virtual_interrupt(soft_timer_t *p_timer)   ////////////terminar de implementar p_timer->timer_start
 {
-	//p_timer->timer_start = true;
-//&& p_timer->timer_cnt
+
 	if((clock_count != previous_clock_count) && p_timer->timer_start) //every time global counter increases (1ms)
 	{
 		//printf("\ncount virtual incrementado");
@@ -129,22 +128,17 @@ soft_timer_status_t soft_timer_start(soft_timer_t *p_timer)   ////////////termin
 			soft_timer_stop(p_timer);   
 	}
 
-		
-
-	//p_timer->callback(p_timer);  //teste de implementação
-	//printf("\n\%d", p_timer->ms_time); //teste de implementação
-	
-
-return SOFT_TIMER_STATUS_SUCCESS;
 }
 
 
 
-//soft_timer_status_t soft_timer_start(soft_timer_t *p_timer)   ////////////terminar de implementar p_timer->timer_start
-//{
-//	p_timer->timer_start = true;
-//	p_timer->timer_cnt = 0; 
-//}
+soft_timer_status_t soft_timer_start(soft_timer_t *p_timer)   ////////////terminar de implementar p_timer->timer_start
+{
+	p_timer->timer_start = true;
+	p_timer->timer_cnt = 0; 
+//printf("\%d\n", p_timer->ms_time);
+//(p_timer->callback)(p_timer);
+}
 
 soft_timer_status_t soft_timer_stop(soft_timer_t *p_timer)
 {
