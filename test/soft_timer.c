@@ -11,39 +11,26 @@
 #include "soft_timer.h"
 #include "hmcu_timer.h"
 
-
-
 /*****************************************************************************
  * Private constants.
  *****************************************************************************/
 
-#define MAX_TIMER_COUNT 65536 //max 16bit timer count value
-uint32_t clock_count = 0, previous_clock_count = 0;
+uint8_t clock_count = 0, previous_clock_count = 0;  //checks if IRQ was called
 uint8_t total_timers = 0;  //check how many timers the program is using
-
-/*****************************************************************************
- * Private macros.
- *****************************************************************************/
-
-/*****************************************************************************
- * Prototypes for private functions.
- *****************************************************************************/
-
-/*****************************************************************************
- * Private types.
- *****************************************************************************/
 
 /*****************************************************************************
  * Global variables.
  *****************************************************************************/
 
 struct soft_timer{
-	bool timer_start;
-	uint32_t timer_cnt;
-	uint32_t ms_time;
-	bool repeat;
-	soft_timer_callback_t callback;
-	}; 
+	bool timer_start; 	 //timer start flag
+	uint32_t timer_cnt;	 //current timer count
+	uint32_t ms_time; 	 //able to count up to 4294967296 ms
+	bool repeat;       	 //timer repeat flag
+	uint8_t status; 	 //timer operation status. Check @ref soft_timer_status_t.
+	soft_timer_callback_t callback;  //callback function
+	}; soft_timer_t *timers[SOFT_TIMER_MAX_INSTANCES]; //array of pointers to be used in IRQ function
+
 
 /*****************************************************************************
  * Bodies of public functions.
@@ -54,24 +41,24 @@ struct soft_timer{
    IRQ, START and RPT set to 1. In this way, once instanciated, timer will always be working to be used by virtual timers. 	
    PreScale set to 0 (00)
    Therefore timer_ctrl will be set to 0b0000000000000111, or 0x0007
-   Devida a baixa frequencia do timer clock de 1000Hz, temos um período de 1ms, tempo mínimo de contagem. Este tempo mínimo de 1ms será      utilizado, portanto o prescale utilizado sera 0 (00), e o timer recarregara somente por um ciclo. Ou seja, a partir de seu valor máximo 0xffff.
+   Due to the low frequency of the 1000Hz timer clock, we have a period of 1ms, minimum counting time. This minimum time of 1ms will be used to trigger other virtual timers interruption routine. The prescale used will be 0 (00), and the timer will only recharge for one cycle. That is, from its maximum value 0xffff.
 *********/
 void soft_timer_init(void)  
 	{
-	//timer_ctrl = 0x0007;
-	//timer_cnt = 0xFFFF;
-	//timer_rld = 0xFFFF;
-	//printf("TESTE");
+	uint16_t timer_ctrl = 0x0007;
+	uint16_t timer_cnt = 0xFFFF;
+	uint16_t timer_rld = 0xFFFF;
 	} 
 
 
-//aloca memoria dinamicamente a partir de um ponteiro vazio (void *)
+//create and allocate memory for virtual timer//
 void soft_timer_create(soft_timer_t **pp_timer)  
 {
 	 if (total_timers < SOFT_TIMER_MAX_INSTANCES - 1)
 	{
-    *pp_timer = malloc(sizeof(void));
-	pp_timer = (soft_timer_t **)malloc(1 * sizeof(soft_timer_t *));  
+        *pp_timer = malloc(sizeof(void));
+	pp_timer = (soft_timer_t **)malloc(1 * sizeof(soft_timer_t *));    
+	
 	total_timers++;
 	}
 	else
@@ -79,17 +66,22 @@ void soft_timer_create(soft_timer_t **pp_timer)
 }
 
 
+/*
+ * @param p_timer    Pointer to timer instance to be configured.
+ * @param timeout_cb Pointer to timeout callback function.
+ * @param reload_ms  Value to reload timer in milliseconds.
+ * @param repeat     Boolean flag signalling if timer should repeat after timeout*/
 
 soft_timer_status_t soft_timer_set(soft_timer_t          *p_timer,
                                    soft_timer_callback_t  timeout_cb,
                                    uint32_t               reload_ms,
                                    bool                   repeat)
-{
-	if (reload_ms < 0 || reload_ms > SOFT_TIMER_MAX_RELOAD_MS)
-		return SOFT_TIMER_STATUS_INVALID_STATE;
+{  
+	if (reload_ms < 0 || reload_ms > SOFT_TIMER_MAX_RELOAD_MS)  //out of timer range
+		return p_timer->status = SOFT_TIMER_STATUS_INVALID_STATE;
 
-	if(timeout_cb == NULL)	                     //////////////melhor forma de checar parametros invalidos?
-		return SOFT_TIMER_STATUS_INVALID_PARAMETER;
+	if(timeout_cb == NULL)	  				   //invalid callback function                   
+		return p_timer->status = SOFT_TIMER_STATUS_INVALID_PARAMETER;
 	
 	p_timer->timer_start = false;
 	p_timer->timer_cnt = 0;
@@ -97,53 +89,29 @@ soft_timer_status_t soft_timer_set(soft_timer_t          *p_timer,
 	p_timer->repeat = repeat;
 	p_timer->callback = timeout_cb;
 
-	//printf("\%d\n", p_timer->ms_time);
-
-	if(reload_ms > MAX_TIMER_COUNT)  //creates auxiliar timer to exceed the limit from 65536ms up to 100.000.000
-	{		
-		soft_timer_t **aux_timer;
-		soft_timer_create(aux_timer);
-		printf("timer auxiliar instanciado");
-		//timeout_cb(*aux_timer);    //////////////////////////preciso referenciar callback e startar timer auxiliar
-	}
-
-	return SOFT_TIMER_STATUS_SUCCESS;	
+	return p_timer->status = SOFT_TIMER_STATUS_SUCCESS;	
 }
 
-
-void soft_timer_virtual_interrupt(soft_timer_t *p_timer)   ////////////terminar de implementar p_timer->timer_start
-{
-
-	if((clock_count != previous_clock_count) && p_timer->timer_start) //every time global counter increases (1ms)
-	{
-		//printf("\ncount virtual incrementado");
-		p_timer->timer_cnt++;
-	}
-	
-	if (p_timer->timer_cnt >= p_timer->ms_time)   //reaches timer goal
-	{	
-		p_timer->timer_cnt = 0; 
-		p_timer->callback(p_timer);
-		if(!p_timer->repeat)
-			soft_timer_stop(p_timer);   
-	}
-
-}
-
-
-
-soft_timer_status_t soft_timer_start(soft_timer_t *p_timer)   ////////////terminar de implementar p_timer->timer_start
+//starts virtual timer//
+soft_timer_status_t soft_timer_start(soft_timer_t *p_timer)  
 {
 	p_timer->timer_start = true;
 	p_timer->timer_cnt = 0; 
+
+	return p_timer->status = SOFT_TIMER_STATUS_SUCCESS;
+	
+	//printf("\%d\n", &timers[1]->ms_time);
 //printf("\%d\n", p_timer->ms_time);
 //(p_timer->callback)(p_timer);
 }
 
+//stops virtual timer//
 soft_timer_status_t soft_timer_stop(soft_timer_t *p_timer)
 {
 	p_timer->timer_start = false;
 	p_timer->timer_cnt = 0; 
+
+	return p_timer->status = SOFT_TIMER_STATUS_SUCCESS;
 }
 
 
@@ -158,26 +126,35 @@ void soft_timer_destroy(soft_timer_t **pp_timer)
  * Bodies of private functions.
  *****************************************************************************/
 
+//called from IRQ routine to check virtual interruptions//
+void soft_timer_virtual_interrupt(soft_timer_t *p_timer)   
+{
+
+	if((clock_count != previous_clock_count) && p_timer->timer_start) //every time global counter increases (1ms)
+		p_timer->timer_cnt++;
+	
+	
+	if (p_timer->timer_cnt >= p_timer->ms_time)   //reaches timer goal
+	{	
+		p_timer->timer_cnt = 0; 
+		p_timer->callback(p_timer);
+		if(!p_timer->repeat)      //do only once if repeat is set to false
+			soft_timer_stop(p_timer);   
+	}
+
+}
+
 //Increase virtual counter every 1ms to be used for other timers//
 void hmcu_timer_irq_handler(void)
 {	
 	previous_clock_count = clock_count;
 	clock_count++;
-	
-	//printf("interrupt test");
-	//usleep(1000000);
-	//printf("\ninterrupt test");
-	usleep(1000);
+
+	usleep(1000);  //used for testing purpose
 }
 
 
 
 
-
-/*void testFunction(soft_timer_t *p_timer)
-{
-	p_timer = (soft_timer_t *)malloc(1 * sizeof(soft_timer_t));
-	p_timer->ms_time = 1;
-}*/
 
 
