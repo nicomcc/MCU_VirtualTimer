@@ -186,7 +186,7 @@ void hmcu_timer_irq_handler(void)
 		}
 		soft_timer_virtual_interrupt(timers[i]);
 	}
-	usleep(1000);  //used for testing purpose
+	//usleep(1000);  //used for testing purpose
 }
 
 
