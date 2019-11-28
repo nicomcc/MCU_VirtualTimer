@@ -17,7 +17,11 @@
 
 uint8_t clock_count = 0, previous_clock_count = 0;  //checks if IRQ was called
 uint8_t total_timers = 0;  //check how many timers the program is using
-uint8_t arrayLenght = 0;
+uint8_t arrayLenght = 0;  //array size to attribute timer id
+
+uint16_t timer_ctrl = 0x0007;
+uint16_t timer_cnt = 0xFFFF;
+uint16_t timer_rld = 0xFFFF;
 
 /*****************************************************************************
  * Global variables.
@@ -47,11 +51,12 @@ soft_timer_t* timers[SOFT_TIMER_MAX_INSTANCES]; //array of pointers to be used i
    Therefore timer_ctrl will be set to 0b0000000000000111, or 0x0007
    Due to the low frequency of the 1000Hz timer clock, we have a period of 1ms, minimum counting time. This minimum time of 1ms will be used to trigger other virtual timers interruption routine. The prescale used will be 0 (00), and the timer will only recharge for one cycle. That is, from its maximum value 0xffff.
 *********/
+
 void soft_timer_init(void)  
 {
-	uint16_t timer_ctrl = 0x0007;
-	uint16_t timer_cnt = 0xFFFF;
-	uint16_t timer_rld = 0xFFFF;
+	*TIMER_CTRL_REG_ADDR = 0x0007;
+	*TIMER_CNT_REG_ADDR = 0xFFFF;
+	*TIMER_RLD_REG_ADDR = 0xFFFF;
 	uint8_t i;
 	for (i = 0; i < SOFT_TIMER_MAX_INSTANCES; i++)
 	{
@@ -156,7 +161,9 @@ void soft_timer_virtual_interrupt(soft_timer_t *p_timer)
 
 }
 
-//Increase virtual counter every 1ms to be used for other timers//
+
+//***Increase virtual counter every 1ms to be used for other timers***//
+//***Calls virtual interrupts for each timer instanciated;************//
 void hmcu_timer_irq_handler(void)
 {	
 	previous_clock_count = clock_count;
